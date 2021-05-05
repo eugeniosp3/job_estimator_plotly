@@ -12,16 +12,7 @@ todays_date = date.today()
 app = dash.Dash()
 server = app.server
 
-
-
 app.layout = html.Div([
-    html.Label('Home Construction Year Estimate'),
-    html.Br(),
-    html.Br(),
-    dcc.Dropdown(id='const-year',
-        options=[{'label': 'Around {A}'.format(A=x), 'value': x} for x in range(1900, todays_date.year, 20)],
-    searchable=False
-),
     html.Br(),
     html.Label('Square Footage of Space'),
     html.Br(),
@@ -34,44 +25,118 @@ app.layout = html.Div([
         marks={i: '{} Sq Feet'.format(i * 500) for i in range(11)},
         value=0,
     ),
+    html.Br(),
+    html.Label('Size of System to be Replaced'),
+    html.Br(),
+    html.Br(),
+
+    dcc.RadioItems(
+        id='system_size',
+        options=[
+            {'label': '.5-1.5 Tons', 'value': '0'},
+            {'label': '2-3.5 Tons', 'value': '1'},
+            {'label': '4-6 Tons', 'value': '2'},
+            {'label': '6.5+ Tons', 'value': '3'},
+
+        ],
+        labelStyle={'display': 'inline-block'},
+        value=''
+    ),
+    html.Br(),
+    html.Br(),
+    html.Label('How old is the system?'),
+    html.Br(),
+    html.Br(),
+    dcc.RadioItems(
+        id='sys-age',
+        options=[
+            {'label': '0-3 Years', 'value': '0'},
+            {'label': '4-8 Years', 'value': '1'},
+            {'label': '9-14 Years', 'value': '2'},
+            {'label': '15+ Years', 'value': '3'},
+
+        ],
+        labelStyle={'display': 'inline-block'},
+        value=''),
+    html.Br(),
+    html.Br(),
+    html.Label('How many stories is the home (excluding basement)?'),
+    html.Br(),
+    html.Br(),
+    dcc.RadioItems(
+        id='stories_q',
+        options=[
+            {'label': '1 Floor', 'value': '0'},
+            {'label': '2 Floors', 'value': '1'},
+            {'label': '3 Floors', 'value': '2'},
+            {'label': '4+ Floors', 'value': '3'}],
+
+    ),
+    html.Br(),
+    html.Br(),
+    html.Label('Approximate Home Construction Year'),
+    html.Br(),
+    html.Br(),
+    dcc.Slider(id='const-year',
+               min=1880,
+               max=2020,
+               value='',
+               marks={x: 'Before {A}'.format(A=x) for x in range(1880, 2040, 20)},
+               ),
+    html.Label('Are there pets at home?'),
+    html.Br(),
+    html.Br(),
+    dcc.RadioItems(
+        id='pet-yesno',
+        options=[
+            {'label': 'Yes', 'value': '1'},
+            {'label': 'No', 'value': '0'}
+        ],
+        labelStyle={'display': 'inline-block'},
+        value=''),
 
     html.Br(),
-    html.Label('Types of Units In Home'),
+    html.Label('Type of Unit'),
     html.Br(),
     html.Br(),
 
-    dcc.Checklist(id='unit-type',
+    dcc.RadioItems(
+        id='unit-type',
         options=[
             {'label': 'Window Unit', 'value': 'Window Unit'},
             {'label': 'Gas Heater', 'value': 'Gas Heater'},
             {'label': 'Electric Heater', 'value': 'Electric Heater'},
-            {'label': 'Electric Cooler', 'value': 'Electric Cooler'},
-            {'label': 'Electric Two-in-One', 'value': 'Electric Two-in-One'}
+            {'label': 'Electric Cooler', 'value': 'Electric Cooling'},
+            {'label': 'Electric Two-in-One', 'value': 'Electric Heater & Cooling'}
         ],
-        labelStyle={'display': 'inline-block'}),
+        labelStyle={'display': 'inline-block'},
+    ),
     html.Br(),
-    html.Label('Bedrooms'),
+    html.Label('Number of Rooms (Bed/Office/Play)'),
     html.Br(),
     html.Br(),
 
-    dcc.Slider(
-        id='rooms-number',
-        min=0,
-        max=9,
-        marks={i: '{} Rooms'.format(i) for i in range(10)},
-        value=3,
+    dcc.RadioItems(
+        id='rooms_check',
+        options=[
+            {'label': '1-3 Rooms', 'value': '1to3'},
+            {'label': '4-6 Rooms', 'value': '4to6'},
+            {'label': '7+ Rooms', 'value': '7ormore'}
+        ],
+        value='',
+        labelStyle={'display': 'inline-block'},
     ),
 
     html.Div(id='output-element'),
     html.Br(),
     html.Br(),
-    html.Div(id='cost-holder')
+    html.Div(id='cost-holder'),
+    html.Br(),
+    html.Br(),
 
 
 ]
     ,
-
-
 
 )
 
@@ -81,9 +146,8 @@ app.layout = html.Div([
     [Input('const-year', 'value'),
      Input('unit-type', 'value'),
      Input('rooms-number', 'value'),
-     Input('sq-feet', 'value'),])
+     Input('sq-feet', 'value'), ])
 def update_output(year_value, unit_type, rooms_number, sq_feet):
-
     est_multiplier = 0
     yc = year_value
 
@@ -93,10 +157,7 @@ def update_output(year_value, unit_type, rooms_number, sq_feet):
         est_multiplier = 1.2
     print('yc: ', yc)
 
-
-
     print(unit_type)
-
 
     sf = sq_feet * 500
     print('sq feet', sf)
@@ -112,7 +173,6 @@ def update_output(year_value, unit_type, rooms_number, sq_feet):
     unit_cost = unit_dictionary[unit_type[0]]
     print(unit_cost)
 
-
     rn = rooms_number
     print(rn)
 
@@ -126,9 +186,5 @@ def update_output(year_value, unit_type, rooms_number, sq_feet):
     return 'Estimated Total (+/- 10% of Actual): {}'.format(final_cost)
 
 
-
-
-
-
 if __name__ == '__main__':
-    app.run_server(debug=False,dev_tools_ui=False,dev_tools_props_check=False)
+    app.run_server(debug=False, dev_tools_ui=False, dev_tools_props_check=False)
